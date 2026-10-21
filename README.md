@@ -72,8 +72,10 @@ Include only the technologies actually used in the published application.
 4. The application stores the review and its analysis results in the database.
 5. The dashboard displays the available analysis results for exploration and monitoring.
 
+
 ## Repository Structure
 
+```text
 indobert-absa-restaurant-dashboard/
 ├── controllers/
 ├── data/
@@ -93,27 +95,31 @@ indobert-absa-restaurant-dashboard/
 ├── .env.example
 ├── .gitignore
 └── README.md
+```
 
-### Directory and File Description
+## Directory and File Description
 
+| Directory/File | Description |
+|---|---|
 | `controllers/` | Contains controller modules for handling application requests and coordinating application logic. |
-| `data/` | Contains supporting data files used by the application, if applicable. |
-| `model_ai/` | Contains AI model artifacts or related files used for model inference. |
-| `models/` | Contains application model modules or data-related model definitions. |
-| `services/` | Contains service modules for application operations and business logic. |
-| `static/` | Contains static assets such as CSS, JavaScript, images, and other frontend resources. |
+| `data/` | Stores supporting data files used by the application. |
+| `model_ai/` | Contains AI model artifacts required for model inference. |
+| `models/` | Contains application model modules and data model definitions. |
+| `services/` | Contains service modules responsible for application operations and business logic. |
+| `static/` | Stores static assets, including CSS, JavaScript, and images. |
 | `templates/` | Contains HTML templates rendered by Flask using Jinja2. |
-| `utils/` | Contains utility functions and supporting modules. |
-| `app.py` | Main entry point for the Flask application. |
-| `create_user.py` | Script related to user creation or account initialization. |
-| `database.py` | Contains database connection or database access logic. |
-| `package.json` | Defines Node.js package metadata and scripts, if used by the project. |
-| `package-lock.json` | Records the dependency tree for npm packages. |
-| `requirements.txt` | Lists Python dependencies required by the application. |
-| `test_model.py` | Contains model-related testing code. |
-
-The descriptions above are based on the directory and file names. Their exact responsibilities should be confirmed by inspecting the source code.
-
+| `utils/` | Contains utility functions and helper modules. |
+| `app.py` | Main entry point for running the Flask application. |
+| `create_user.py` | Script for creating or initializing application user accounts. |
+| `database.py` | Handles database connections and related database operations. |
+| `package.json` | Defines Node.js package metadata, dependencies, and scripts, if applicable. |
+| `package-lock.json` | Records the dependency tree and versions of npm packages. |
+| `requirements.txt` | Lists the Python dependencies required by the application. |
+| `test_model.py` | Contains scripts for testing the AI model or its inference functionality. |
+| `.env.example` | Provides an example of the environment variables required for application configuration. |
+| `.gitignore` | Specifies files and directories that Git should ignore. |
+| `README.md` | Provides project documentation, installation instructions, and usage information. |
+**Note:** The descriptions are based on the repository structure and file names. Exact responsibilities may vary depending on the implementation.
 
 ## Requirements
 

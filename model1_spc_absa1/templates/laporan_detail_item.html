@@ -1,0 +1,118 @@
+{% extends "base.html" %}
+
+{% block title %}Detail Analisis Review{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="mb-3 d-flex align-items-center">
+        <a href="{{ url_for('report.index', batch_id=data.review.batch_id) }}" class="btn btn-sm btn-outline-secondary bg-white shadow-sm me-3">
+            <i class="fas fa-arrow-left me-1"></i> Kembali
+        </a>
+        <h4 class="mb-0 text-dark fw-bold">Detail Laporan Analisis</h4>
+    </div>
+
+    <div class="row g-4">
+        <div class="col-md-4">
+            <div class="card shadow-sm border-0 h-100 rounded">
+                <div class="card-body p-4">
+                    <h5 class="fw-bold text-dark mb-4 border-bottom pb-2">
+                        <i class="fas fa-info-circle text-primary me-2"></i>Informasi Ulasan
+                    </h5>
+                    
+                    <div class="mb-3">
+                        <span class="text-muted d-block mb-1" style="font-size: 0.75rem; font-weight: 600; text-transform: uppercase;">ID Review</span>
+                        <span class="text-dark fw-medium">#{{ data.review.id_review[:8] if data.review.id_review is string else data.review.id_review }}</span>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <span class="text-muted d-block mb-1" style="font-size: 0.75rem; font-weight: 600; text-transform: uppercase;">Tanggal Ulasan</span>
+                        <span class="text-dark"><i class="far fa-calendar-alt me-1 text-secondary"></i> {{ data.review.review_date.strftime('%d %B %Y') }}</span>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <span class="text-muted d-block mb-1" style="font-size: 0.75rem; font-weight: 600; text-transform: uppercase;">Status Pemrosesan</span>
+                        {% if data.review.processing_status == 'COMPLETED' %}
+                            <span class="badge bg-success bg-opacity-10 text-success border border-success-subtle px-2 py-1"><i class="fas fa-check-circle me-1"></i>Selesai</span>
+                        {% elif data.review.processing_status == 'PENDING' %}
+                            <span class="badge bg-warning bg-opacity-10 text-warning border border-warning-subtle px-2 py-1"><i class="fas fa-clock me-1"></i>Menunggu</span>
+                        {% else %}
+                            <span class="badge bg-danger bg-opacity-10 text-danger border border-danger-subtle px-2 py-1"><i class="fas fa-times-circle me-1"></i>{{ data.review.processing_status }}</span>
+                        {% endif %}
+                    </div>
+                    
+                    <div>
+                        <span class="text-muted d-block mb-2" style="font-size: 0.75rem; font-weight: 600; text-transform: uppercase;">Teks Ulasan Asli</span>
+                        <div class="bg-light border rounded p-3 text-dark" style="font-size: 0.9rem; line-height: 1.6;">
+                            "{{ data.review.review_text }}"
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-8">
+            <div class="card shadow-sm border-0 h-100 rounded overflow-hidden">
+                <div class="p-4 border-bottom bg-white">
+                    <h5 class="fw-bold text-dark mb-0">
+                        <i class="fas fa-robot text-success me-2"></i>Hasil Analisis Aspek & Sentimen
+                    </h5>
+                </div>
+                
+                <div class="card-body p-4 bg-light">
+                    <div class="d-flex flex-column gap-3">
+                        {% set mentioned_found = false %}
+                        {% for item in data.analysis %}
+                            {% if item.aspect_label == 1 %}
+                                {% set mentioned_found = true %}
+                                <div class="card border-0 shadow-sm rounded-3 overflow-hidden">
+                                    <div class="card-body p-4">
+                                        <div class="d-flex align-items-center mb-3 gap-2">
+                                            {% set icon = "fa-utensils" %}
+                                            {% if item.aspect == "Layanan" %}{% set icon = "fa-concierge-bell" %}{% endif %}
+                                            {% if item.aspect == "Suasana" %}{% set icon = "fa-star" %}{% endif %}
+                                            {% if item.aspect == "Harga" %}{% set icon = "fa-tags" %}{% endif %}
+                                            {% if item.aspect == "Lokasi" %}{% set icon = "fa-map-marker-alt" %}{% endif %}
+                                            
+                                            <h6 class="fw-bold text-dark mb-0"><i class="fas {{ icon }} text-primary me-2"></i>{{ item.aspect }}</h6>
+                                            <span class="text-muted" style="font-size: 0.85rem;">→</span>
+                                            {% if item.sentiment == 'Positif' %}
+                                                <span class="badge bg-success bg-opacity-10 text-success border border-success-subtle px-2 py-1"><i class="fas fa-smile me-1"></i>Positif</span>
+                                            {% elif item.sentiment == 'Negatif' %}
+                                                <span class="badge bg-danger bg-opacity-10 text-danger border border-danger-subtle px-2 py-1"><i class="fas fa-frown me-1"></i>Negatif</span>
+                                            {% elif item.sentiment == 'Netral' %}
+                                                <span class="badge bg-secondary bg-opacity-10 text-secondary border border-secondary-subtle px-2 py-1"><i class="fas fa-meh me-1"></i>Netral</span>
+                                            {% endif %}
+                                        </div>
+                                        
+                                        <div class="text-dark mb-3" style="font-size: 0.95rem; line-height: 1.6;">
+                                            {{ item.highlighted_review | safe }}
+                                        </div>
+
+                                        {% if item.keywords %}
+                                        <div class="d-flex align-items-center gap-2 border-top pt-3 mt-2">
+                                            <span class="text-muted fw-semibold" style="font-size: 0.75rem; text-transform: uppercase;">Kata Kunci Terdeteksi:</span>
+                                            <div class="d-flex flex-wrap gap-1">
+                                                {% for word in item.keywords %}
+                                                    <span class="badge bg-light text-secondary border border-secondary-subtle fw-medium px-2 py-1">{{ word }}</span>
+                                                {% endfor %}
+                                            </div>
+                                        </div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            {% endif %}
+                        {% endfor %}
+                        
+                        {% if not mentioned_found %}
+                            <div class="text-center py-5 text-muted">
+                                <i class="fas fa-info-circle fs-2 mb-3 opacity-25"></i>
+                                <p class="mb-0">Tidak ada aspek yang terdeteksi dalam ulasan ini.</p>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

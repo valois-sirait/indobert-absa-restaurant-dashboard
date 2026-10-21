@@ -1,0 +1,305 @@
+{% extends "base.html" %}
+
+{% block title %}Laporan Detail{% endblock %}
+
+{% block content %}
+<div class="container">
+    {% if request.args.get('batch_id') %}
+        <!-- TAMPILAN TABEL DETAIL KELOMPOK DATA -->
+        <div class="mb-3 d-flex align-items-center">
+            <a href="{{ url_for('report.index') }}" class="btn btn-sm btn-outline-secondary bg-white shadow-sm me-3">
+                <i class="fas fa-arrow-left me-1"></i> Kembali ke Daftar Kelompok Data
+            </a>
+            <h4 class="mb-0 text-dark fw-bold">Detail Laporan Kelompok Data: {{ request.args.get('batch_id') }}</h4>
+        </div>
+
+        <!-- Filter Bar Compact Horizontal -->
+        <div class="bg-light border rounded px-3 py-2 mb-3 shadow-sm">
+            <form method="GET" action="{{ url_for('report.index') }}" class="row g-2 align-items-center m-0">
+                <input type="hidden" name="batch_id" value="{{ request.args.get('batch_id') }}">
+                <div class="col-12 col-md-3 flex-grow-1">
+                    <div class="input-group input-group-sm">
+                        <span class="input-group-text bg-white text-muted border-end-0 mt-2"><i class="fas fa-search"></i></span>
+                        <input type="text" name="search" class="form-control form-control-sm border-start-0 ps-0" placeholder="Ketik kata kunci ulasan..." value="{{ request.args.get('search', '') }}">
+                    </div>
+                </div>
+                
+                <div class="col-6 col-md-auto">
+                    <select name="aspect" class="form-select form-select-sm text-secondary mt-2">
+                        <option value="Semua Aspek" {% if request.args.get('aspect') == 'Semua Aspek' %}selected{% endif %}>Semua Aspek</option>
+                        <option value="Makanan" {% if request.args.get('aspect') == 'Makanan' %}selected{% endif %}>Makanan</option>
+                        <option value="Layanan" {% if request.args.get('aspect') == 'Layanan' %}selected{% endif %}>Layanan</option>
+                        <option value="Suasana" {% if request.args.get('aspect') == 'Suasana' %}selected{% endif %}>Suasana</option>
+                        <option value="Harga" {% if request.args.get('aspect') == 'Harga' %}selected{% endif %}>Harga</option>
+                        <option value="Lokasi" {% if request.args.get('aspect') == 'Lokasi' %}selected{% endif %}>Lokasi</option>
+                    </select>
+                </div>
+                
+                <div class="col-6 col-md-auto">
+                    <select name="sentiment" class="form-select form-select-sm text-secondary mt-2">
+                        <option value="Semua Sentimen" {% if request.args.get('sentiment') == 'Semua Sentimen' %}selected{% endif %}>Semua Sentimen</option>
+                        <option value="Positif" {% if request.args.get('sentiment') == 'Positif' %}selected{% endif %}>Positif</option>
+                        <option value="Negatif" {% if request.args.get('sentiment') == 'Negatif' %}selected{% endif %}>Negatif</option>
+                        <option value="Netral" {% if request.args.get('sentiment') == 'Netral' %}selected{% endif %}>Netral</option>
+                    </select>
+                </div>
+                
+                <div class="col-12 col-md-auto d-flex align-items-center gap-1">
+                    <span class="text-muted d-none d-md-inline mt-2" style="font-size: 0.75rem;"><i class="fas fa-calendar-alt"></i></span>
+                    <input type="date" name="start_date" class="form-control form-control-sm text-secondary" value="{{ request.args.get('start_date', '') }}" title="Tanggal Mulai">
+                    <span class="text-muted" style="font-size: 0.8rem;">-</span>
+                    <input type="date" name="end_date" class="form-control form-control-sm text-secondary" value="{{ request.args.get('end_date', '') }}" title="Tanggal Akhir">
+                </div>
+                
+                <div class="col-12 col-md-auto ms-md-auto d-flex gap-2">
+                    <button type="submit" class="btn btn-primary btn-sm px-2 py-1 fw-medium w-80"><i class="fas fa-filter me-1"></i>Terapkan</button>
+                    <a href="{{ url_for('report.index', batch_id=request.args.get('batch_id')) }}" class="btn btn-outline-secondary bg-white btn-sm px-2 h-50 mt-2 rounded-3" title="Reset Filter"><i class="fas fa-redo-alt"></i></a>
+                </div>
+            </form>
+        </div>
+
+        {% if items %}
+            <div class="card shadow-sm border-0 rounded-4 mb-4 overflow-hidden">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0 data-table" style="font-size: 0.9rem;">
+                        <thead class="bg-light text-muted border-bottom">
+                            <tr>
+                                <th class="ps-4 fw-semibold" style="width: 10%;">ID</th>
+                                <th class="fw-semibold" style="width: 15%;">Tanggal</th>
+                                <th class="fw-semibold" style="max-width: 40%;">Teks Ulasan</th>
+                                <th class="text-center fw-semibold" style="width: 12%;">Jlh. Aspek</th>
+                                <th class="text-center fw-semibold" style="width: 13%;">Sentimen</th>
+                                <th class="text-center pe-4 fw-semibold" style="width: 10%;">Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody class="border-top-0">
+                            {% for item in items %}
+                            <tr>
+                                <td class="ps-4 text-secondary fw-medium">#{{ item.id_review[:8] if item.id_review is string else item.id_review }}</td>
+                                <td class="text-nowrap text-secondary"><i class="far fa-calendar-alt me-2 opacity-50"></i>{{ item.review_date.strftime('%d %b %Y') }}</td>
+                                <td>
+                                    <div class="text-truncate text-dark pe-3" style="max-width: 400px;" title="{{ item.review_text }}">
+                                        {{ item.review_text }}
+                                    </div>
+                                </td>
+                                <td class="text-center">
+                                    <span class="badge bg-primary bg-opacity-10 text-primary border border-primary-subtle px-3 py-1 rounded-pill" title="Terdeteksi {{ item.total_aspek }} Aspek">{{ item.total_aspek }} Aspek</span>
+                                </td>
+                                <td class="text-center">
+                                    {% if item.dominant_sentiment == 'Positif' %}
+                                        <span class="badge bg-success bg-opacity-10 text-success border border-success-subtle px-3 py-1 rounded-pill"><i class="fas fa-smile me-1"></i>Positif</span>
+                                    {% elif item.dominant_sentiment == 'Negatif' %}
+                                        <span class="badge bg-danger bg-opacity-10 text-danger border border-danger-subtle px-3 py-1 rounded-pill"><i class="fas fa-frown me-1"></i>Negatif</span>
+                                    {% elif item.dominant_sentiment == 'Netral' %}
+                                        <span class="badge bg-secondary bg-opacity-10 text-secondary border border-secondary-subtle px-3 py-1 rounded-pill"><i class="fas fa-meh me-1"></i>Netral</span>
+                                    {% else %}
+                                        <span class="badge bg-warning bg-opacity-10 text-warning border border-warning-subtle px-3 py-1 rounded-pill" title="Menunggu proses klasifikasi AI"><i class="fas fa-hourglass-half me-1"></i>Belum Dianalisis</span>
+                                    {% endif %}
+                                </td>
+                                <td class="text-center pe-4 text-nowrap">
+                                    <div class="d-flex justify-content-center gap-2">
+                                        <a href="{{ url_for('report.detail', review_id=item.id_review) }}" class="btn btn-sm btn-light border text-primary rounded-3 mt-2" data-bs-toggle="tooltip" title="Lihat Penjelasan XAI"><i class="fas fa-eye"></i></a>
+                                        <button class="btn btn-sm btn-light border text-danger rounded-3 " onclick="deleteData('{{ item.id_review }}')" data-bs-toggle="tooltip" title="Hapus Data"><i class="fas fa-trash"></i></button>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                
+                <!-- Modern Pagination -->
+                <div class="card-footer bg-white py-3 px-4 d-flex flex-wrap justify-content-between align-items-center border-top">
+                    <span class="text-muted" style="font-size: 0.8rem;">
+                        {% set start_item = (pagination.page - 1) * pagination.per_page + 1 %}
+                        {% set end_item = start_item + items|length - 1 %}
+                        Menampilkan <b>{{ start_item }}</b>–<b>{{ end_item }}</b> dari total <b>{{ pagination.total }}</b> data
+                    </span>
+                    
+                    <div class="d-flex gap-1">
+                        {% if pagination.has_prev %}
+                            <a href="{{ url_for('report.index', page=pagination.prev_num, search=request.args.get('search', ''), aspect=request.args.get('aspect', ''), sentiment=request.args.get('sentiment', ''), start_date=request.args.get('start_date', ''), end_date=request.args.get('end_date', ''), batch_id=request.args.get('batch_id', '')) }}" class="btn btn-sm btn-outline-secondary py-1 px-2" title="Halaman Sebelumnya"><i class="fas fa-chevron-left"></i></a>
+                        {% else %}
+                            <button class="btn btn-sm btn-outline-secondary py-1 px-2 opacity-50" disabled><i class="fas fa-chevron-left"></i></button>
+                        {% endif %}
+                        
+                        {% for page_num in pagination.iter_pages(left_edge=1, right_edge=1, left_current=2, right_current=2) %}
+                            {% if page_num %}
+                                {% if pagination.page == page_num %}
+                                    <button class="btn btn-sm btn-primary py-1 px-3 fw-bold">{{ page_num }}</button>
+                                {% else %}
+                                    <a href="{{ url_for('report.index', page=page_num, search=request.args.get('search', ''), aspect=request.args.get('aspect', ''), sentiment=request.args.get('sentiment', ''), start_date=request.args.get('start_date', ''), end_date=request.args.get('end_date', ''), batch_id=request.args.get('batch_id', '')) }}" class="btn btn-sm btn-outline-secondary py-1 px-2">{{ page_num }}</a>
+                                {% endif %}
+                            {% else %}
+                                <span class="btn btn-sm btn-outline-secondary py-1 px-2 border-0 disabled">...</span>
+                            {% endif %}
+                        {% endfor %}
+                        
+                        {% if pagination.has_next %}
+                            <a href="{{ url_for('report.index', page=pagination.next_num, search=request.args.get('search', ''), aspect=request.args.get('aspect', ''), sentiment=request.args.get('sentiment', ''), start_date=request.args.get('start_date', ''), end_date=request.args.get('end_date', ''), batch_id=request.args.get('batch_id', '')) }}" class="btn btn-sm btn-outline-secondary py-1 px-2" title="Halaman Berikutnya"><i class="fas fa-chevron-right"></i></a>
+                        {% else %}
+                            <button class="btn btn-sm btn-outline-secondary py-1 px-2 opacity-50" disabled><i class="fas fa-chevron-right"></i></button>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        {% else %}
+            <div class="card shadow-sm border-0 rounded mb-4">
+                <div class="card-body text-center py-5 text-muted">
+                    <i class="fas fa-search fs-2 mb-3 opacity-25"></i><br>
+                    Tidak ada data ulasan yang sesuai dengan filter pencarian.
+                </div>
+            </div>
+        {% endif %}
+    {% else %}
+        <!-- TAMPILAN GRID CARD (SEMUA KELOMPOK DATA) -->
+        <div class="mb-4 d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
+            <div>
+                <h4 class="mb-1 text-dark fw-bold"><i class="fas fa-layer-group text-black me-2"></i>Pilih Laporan Analisis</h4>
+                <p class="text-muted mb-0" style="font-size: 0.95rem;">Cari dan pilih kelompok data yang ingin Anda lihat detail laporannya.</p>
+            </div>
+            <form method="GET" action="{{ url_for('report.index') }}" class="d-flex gap-2">
+                <div class="input-group shadow-sm rounded">
+                    <span class="input-group-text bg-white text-muted border-end-0"><i class="fas fa-filter"></i></span>
+                    <select name="search" class="form-select border-start-0 ps-0 text-secondary" style="min-width: 250px;" onchange="this.form.submit()">
+                        <option value="">-- Semua Kelompok Data --</option>
+                        {% for batch in all_batches %}
+                        <option value="{{ batch }}" {% if request.args.get('search') == batch|string %}selected{% endif %}>{{ batch }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </form>
+        </div>
+
+        {% if batch_summaries %}
+            <div class="row g-4 mb-4">
+                {% for summary in batch_summaries %}
+                <div class="col-md-6 col-lg-4">
+                    <div class="card h-100 shadow-sm border-0 rounded-4">
+                        <div class="card-body">
+                            <div class="d-flex align-items-center justify-content-between mb-3">
+                                <div class="d-flex align-items-center">
+                                    <div class="bg-primary bg-opacity-10 text-primary rounded-circle p-2 me-3 d-flex align-items-center justify-content-center" style="width: 45px; height: 45px;">
+                                        <i class="fas fa-layer-group fs-5"></i>
+                                    </div>
+                                    <div>
+                                        <h6 class="mb-0 fw-bold text-dark text-truncate" style="max-width: 150px;" title="{{ summary.batch_id }}">{{ summary.batch_id }}</h6>
+                                        <small class="text-muted" style="font-size: 0.75rem;">ID Dataset</small>
+                                    </div>
+                                </div>
+                                {% if summary.source_type == 'CSV' %}
+                                    <span class="badge bg-info bg-opacity-10 text-info border border-info-subtle px-2 py-1"><i class="fas fa-file-csv me-1"></i>CSV</span>
+                                {% elif summary.source_type == 'Scraping' %}
+                                    <span class="badge bg-primary bg-opacity-10 text-primary border border-primary-subtle px-2 py-1"><i class="fas fa-globe me-1"></i>Web</span>
+                                {% else %}
+                                    <span class="badge bg-secondary bg-opacity-10 text-secondary border border-secondary-subtle px-2 py-1">{{ summary.source_type }}</span>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="mb-3 px-2">
+                                <div class="d-flex justify-content-between mb-2">
+                                    <span class="text-muted small fw-medium">Detail Sumber</span>
+                                    <span class="fw-semibold text-dark text-truncate text-end" style="max-width: 160px;" title="{{ summary.source_detail }}">{{ summary.source_detail }}</span>
+                                </div>
+                                <div class="d-flex justify-content-between mb-2">
+                                    <span class="text-muted small fw-medium">Jumlah Ulasan</span>
+                                    <div class="text-end">
+                                        <span class="fw-bold text-dark">{{ summary.total_reviews }} <span class="fw-normal text-muted small">Data Aktif</span></span>
+                                        {% if summary.total_fetched %}
+                                        <br>
+                                        <small class="text-muted" style="font-size: 0.7rem;" data-bs-toggle="tooltip" title="Ditarik: {{ summary.total_fetched }} | Disimpan: {{ summary.saved_count }} | Diabaikan: {{ summary.ignored_count }}">
+                                            <i class="fas fa-info-circle me-1 opacity-75"></i>{{ summary.saved_count }} dari {{ summary.total_fetched }} disimpan
+                                        </small>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                <div class="d-flex justify-content-between mb-2">
+                                    <span class="text-muted small fw-medium">Data Terbaru</span>
+                                    <span class="fw-semibold text-dark">{{ summary.latest_date.strftime('%d %b %Y') }}</span>
+                                </div>
+                            </div>
+                            
+                            <a href="{{ url_for('report.index', batch_id=summary.batch_id) }}" class="btn btn-outline-success btn-sm w-100 rounded-3 fw-semibold" data-bs-toggle="tooltip" title="Lihat detail laporan untuk kelompok data ini">
+                                Lihat Detail Laporan <i class="fas fa-arrow-right ms-1"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+
+            <!-- Modern Pagination untuk Halaman Grid -->
+            <div class="card-footer bg-white border-top py-3 px-4 d-flex flex-wrap justify-content-between align-items-center rounded-4 shadow-sm mb-4">
+                    <span class="text-muted" style="font-size: 0.8rem;">
+                        {% set start_item = (pagination.page - 1) * pagination.per_page + 1 %}
+                        {% set end_item = start_item + batch_summaries|length - 1 %}
+                        Menampilkan <b>{{ start_item }}</b>–<b>{{ end_item }}</b> dari total <b>{{ pagination.total }}</b> kelompok data
+                    </span>
+                    <div class="d-flex gap-1">
+                        {% if pagination.has_prev %}
+                            <a href="{{ url_for('report.index', page=pagination.prev_num, search=request.args.get('search', '')) }}" class="btn btn-sm btn-outline-secondary py-1 px-2" title="Halaman Sebelumnya"><i class="fas fa-chevron-left"></i></a>
+                        {% else %}
+                            <button class="btn btn-sm btn-outline-secondary py-1 px-2 opacity-50" disabled><i class="fas fa-chevron-left"></i></button>
+                        {% endif %}
+                        
+                        {% for page_num in pagination.iter_pages(left_edge=1, right_edge=1, left_current=2, right_current=2) %}
+                            {% if page_num %}
+                                {% if pagination.page == page_num %}
+                                    <button class="btn btn-sm btn-primary py-1 px-3 fw-bold">{{ page_num }}</button>
+                                {% else %}
+                                    <a href="{{ url_for('report.index', page=page_num, search=request.args.get('search', '')) }}" class="btn btn-sm btn-outline-secondary py-1 px-2">{{ page_num }}</a>
+                                {% endif %}
+                            {% else %}
+                                <span class="btn btn-sm btn-outline-secondary py-1 px-2 border-0 disabled">...</span>
+                            {% endif %}
+                        {% endfor %}
+                        
+                        {% if pagination.has_next %}
+                            <a href="{{ url_for('report.index', page=pagination.next_num, search=request.args.get('search', '')) }}" class="btn btn-sm btn-outline-secondary py-1 px-2" title="Halaman Berikutnya"><i class="fas fa-chevron-right"></i></a>
+                        {% else %}
+                            <button class="btn btn-sm btn-outline-secondary py-1 px-2 opacity-50" disabled><i class="fas fa-chevron-right"></i></button>
+                        {% endif %}
+                    </div>
+            </div>
+        {% else %}
+        <div class="card shadow-sm border-0 rounded mb-4">
+            <div class="card-body text-center py-5 text-muted">
+                <i class="fas fa-inbox fs-2 mb-3 opacity-25"></i><br>
+                Tidak ada data laporan untuk ditampilkan.
+            </div>
+        </div>
+        {% endif %}
+    {% endif %}
+</div>
+
+<script>
+// Inisialisasi Tooltip Bootstrap agar action button memiliki interaksi yang baik
+document.addEventListener("DOMContentLoaded", function() {
+    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+    var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+        return new bootstrap.Tooltip(tooltipTriggerEl)
+    })
+    });
+
+async function deleteData(reviewId) {
+    if (!confirm('Apakah Anda yakin ingin menghapus data laporan ini?')) return;
+    
+    try {
+        const response = await fetch(`/delete_data/${reviewId}`, { method: 'DELETE' });
+        const result = await response.json();
+        alert(result.message);
+        if(result.success) location.reload();
+    } catch (error) {
+        alert('Terjadi kesalahan sistem saat menghapus data.');
+    }
+}
+</script>
+
+<!-- SweetAlert2 Library -->
+<link rel="stylesheet" href="{{ url_for('static', filename='sweetalert2.min.css') }}">
+<script src="{{ url_for('static', filename='js/sweetalert2.all.min.js') }}"></script>
+
+<!-- File Notifikasi Sentral Anda -->
+<script src="{{ url_for('static', filename='js/app-notifications.js') }}"></script>
+
+{% endblock %}

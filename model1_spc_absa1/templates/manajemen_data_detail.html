@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+
+{% block title %}Detail Data Ulasan{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="mb-4">
+        <a href="{{ url_for('main.management_data') }}" class="btn btn-secondary btn-sm"><i class="fas fa-arrow-left"></i> Kembali ke Manajemen Data</a>
+    </div>
+
+    <div class="card shadow-sm border-0 p-4">
+        <h4 class="mb-3 text-primary border-bottom pb-2">Informasi Detail Ulasan</h4>
+        <div class="row">
+            <div class="col-md-6 mb-3">
+                <span class="text-muted" style="font-size: 0.8rem; text-transform: uppercase;">ID Review (DB)</span><br>
+                <strong>{{ review.id_review }}</strong>
+            </div>
+            <div class="col-md-6 mb-3">
+                <span class="text-muted" style="font-size: 0.8rem; text-transform: uppercase;">Source ID</span><br>
+                <strong>{{ review.source_id }}</strong>
+            </div>
+            <div class="col-md-6 mb-3">
+                <span class="text-muted" style="font-size: 0.8rem; text-transform: uppercase;">Tanggal Ulasan</span><br>
+                <strong>{{ review.review_date.strftime('%d %B %Y') }}</strong>
+            </div>
+            <div class="col-md-6 mb-3">
+                <span class="text-muted" style="font-size: 0.8rem; text-transform: uppercase;">Sumber Input</span><br>
+                <strong>{{ review.input_source }}</strong>
+            </div>
+            <div class="col-md-6 mb-3">
+                <span class="text-muted" style="font-size: 0.8rem; text-transform: uppercase;">Batch Prefix</span><br>
+                <strong>{{ review.batch_prefix }}</strong>
+            </div>
+            <div class="col-md-6 mb-3">
+                <span class="text-muted" style="font-size: 0.8rem; text-transform: uppercase;">Status Pemrosesan</span><br>
+                <span class="badge {% if review.processing_status == 'COMPLETED' %}bg-success{% elif review.processing_status == 'PENDING' %}bg-warning text-dark{% else %}bg-danger{% endif %}">{{ review.processing_status }}</span>
+            </div>
+        </div>
+        
+        <div class="mt-2">
+            <span class="text-muted" style="font-size: 0.8rem; text-transform: uppercase;">Teks Ulasan</span><br>
+            <p class="mt-1" style="font-style: italic; background-color: #f8f9fa; padding: 15px; border-radius: 8px;">"{{ review.review_text }}"</p>
+        </div>
+    </div>
+</div>
+{% endblock %}

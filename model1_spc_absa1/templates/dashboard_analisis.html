@@ -1,0 +1,139 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard Analisis{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-3">
+        <h4 class="mb-0 text-dark fw-bold"><i class="fas fa-chart-line text-black me-2"></i>Dashboard Analisis</h4>
+
+        <!-- Form Filter Rentang Tanggal -->
+        <div class="card shadow-sm border-0 py-2 px-3 m-0">
+            <form method="GET" action="{{ url_for('dashboard.dashboard_page') }}" class="d-flex flex-wrap align-items-end gap-3 m-0">
+                <div>
+                    <label for="batch_id" class="form-label text-muted mb-2 py-1" style="font-size: 0.75rem; font-weight: 600; text-transform: uppercase;">Pilih Kelompok Data</label>
+                    <select id="batch_id" name="batch_id" class="form-select form-select-sm" style="min-width: 150px;" onchange="this.form.submit()">
+                        <option value="">-- Semua Kelompok Data --</option>
+                        {% for batch in available_batches %}
+                        <option value="{{ batch }}" {% if selected_batch|string == batch|string %}selected{% endif %}>{{ batch }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div>
+                    <label for="start_date" class="form-label text-muted mb-1" style="font-size: 0.75rem; font-weight: 600; text-transform: uppercase;">Mulai Tanggal</label>
+                    <input type="date" id="start_date" name="start_date" class="form-control form-control-sm" value="{{ request.args.get('start_date', '') }}">
+                </div>
+                <div>
+                    <label for="end_date" class="form-label text-muted mb-1" style="font-size: 0.75rem; font-weight: 600; text-transform: uppercase;">Sampai Tanggal</label>
+                    <input type="date" id="end_date" name="end_date" class="form-control form-control-sm" value="{{ request.args.get('end_date', '') }}">
+                </div>
+                <div class="d-flex gap-2">
+                    <button type="submit" class="btn btn-primary btn-sm px-3 py-1 mt-1 rounded-3"><i class="fas fa-filter"></i> Filter</button>
+                    <a href="{{ url_for('dashboard.dashboard_page') }}" class="btn btn-light border btn-sm px-3 rounded-3"><i class="fas fa-sync-alt"></i> Reset</a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="summary-cards">
+        <div class="card summary-card">
+            <h3><i class="fas fa-comments text-secondary me-2 mb-4"></i>Total Ulasan</h3>
+            <div class="number">{{ "{:,.0f}".format(summary.total_reviews or 0) }}</div>
+            <div class="trend"><i class="fas fa-info-circle"></i> Sesuai filter waktu terpilih</div>
+        </div>
+        <div class="card summary-card">
+            <h3>Distribusi Sentimen Global</h3>
+            <div class="chart-wrapper" style="height: 200px;">
+                <canvas id="sentimentChart"></canvas>
+            </div>
+            <div class="legend">
+                <div class="legend-item">
+                    <div class="legend-color positive-color"></div>
+                    <span>Positif</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color negative-color"></div>
+                    <span>Negatif</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color neutral-color"></div>
+                    <span>Netral</span>
+                </div>
+            </div>
+        </div>
+        <div class="card summary-card">
+            <h3><i class="fas fa-smile text-secondary me-2 mb-4"></i>Skor Kepuasan</h3>
+            <div class="number">{{ summary.satisfaction_score or 0 }}%</div>
+            <div class="trend"><i class="fas fa-smile-beam"></i> Berdasarkan sentimen positif</div>
+        </div>
+    </div>
+
+    <div class="chart-container">
+        <div class="card chart-card aspect-analysis">
+            <div class="chart-title">Analisis Sentimen per Aspek</div>
+            <div class="chart-wrapper">
+                <canvas id="aspectChart"></canvas>
+            </div>
+            <div class="legend">
+                <div class="legend-item">
+                    <div class="legend-color positive-color"></div>
+                    <span>Positif</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color negative-color"></div>
+                    <span>Negatif</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color neutral-color"></div>
+                    <span>Netral</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="card chart-card keyword-insights w-100 mt-4 mb-4" style="grid-column: 1 / -1;">
+            <div class="chart-header mb-3 border-bottom pb-3">
+                <div class="chart-title mb-1"><i class="fas fa-lightbulb text-warning me-2"></i>Faktor Penentu Sentimen (Insight AI)</div>
+                <div class="text-muted" style="font-size: 0.85rem;">Kata kunci paling dominan yang menjadi alasan mengapa pelanggan memberikan sentimen positif atau negatif, difilter berdasarkan rentang waktu terpilih.</div>
+            </div>
+            <div id="keywordInsightsContainer" class="row g-3">
+                <!-- Konten Kata Kunci akan disuntikkan secara dinamis oleh JS di sini -->
+            </div>
+        </div>
+
+        <div class="card chart-card time-series">
+            <div class="chart-header d-flex justify-content-between align-items-center mb-3">
+                <div class="chart-title mb-0">Tren Sentimen (Time Series)</div>
+                <select id="timeGroupingSelect" class="form-select form-select-sm" style="width: auto; cursor: pointer;">
+                    <option value="harian" selected>Harian</option>
+                    <option value="mingguan">Mingguan</option>
+                    <option value="bulanan">Bulanan</option>
+                    <option value="tahunan">Tahunan</option>
+                </select>
+            </div>
+            <div class="chart-wrapper">
+                <canvas id="timeSeriesChart"></canvas>
+            </div>
+            <div class="legend">
+                <div class="legend-item">
+                    <div class="legend-color positive-color"></div>
+                    <span>Positif</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color negative-color"></div>
+                    <span>Negatif</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color neutral-color"></div>
+                    <span>Netral</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="{{ url_for('static', filename='js/dashboard-charts.js') }}?v=3"></script>
+
+<!-- File Notifikasi Sentral Anda -->
+<script src="{{ url_for('static', filename='js/app-notifications.js') }}"></script>
+
+{% endblock %}

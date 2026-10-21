@@ -74,33 +74,46 @@ Include only the technologies actually used in the published application.
 
 ## Repository Structure
 
-The following is an example structure. Adjust it to match the actual application files.
-
-```text
 indobert-absa-restaurant-dashboard/
-├── app.py
-├── templates/
-├── static/
-├── model_ai/
+├── controllers/
 ├── data/
-├── database/
+├── model_ai/
+├── models/
+├── services/
+├── static/
+├── templates/
+├── utils/
+├── app.py
+├── create_user.py
+├── database.py
+├── package.json
+├── package-lock.json
 ├── requirements.txt
+├── test_model.py
 ├── .env.example
 ├── .gitignore
 └── README.md
-```
 
-### Directory Description
+### Directory and File Description
 
-- `app.py`: Flask application entry point.
-- `templates/`: HTML templates rendered by Jinja2.
-- `static/`: CSS, JavaScript, and other static assets.
-- `model_ai/`: Model-related files or instructions for obtaining the model.
-- `data/`: Supporting files required by the application, if applicable.
-- `database/`: Database scripts or schema documentation, if provided.
-- `requirements.txt`: Python dependencies.
-- `.env.example`: Example environment variable names without actual credentials.
-- `.gitignore`: Files and directories excluded from version control.
+| `controllers/` | Contains controller modules for handling application requests and coordinating application logic. |
+| `data/` | Contains supporting data files used by the application, if applicable. |
+| `model_ai/` | Contains AI model artifacts or related files used for model inference. |
+| `models/` | Contains application model modules or data-related model definitions. |
+| `services/` | Contains service modules for application operations and business logic. |
+| `static/` | Contains static assets such as CSS, JavaScript, images, and other frontend resources. |
+| `templates/` | Contains HTML templates rendered by Flask using Jinja2. |
+| `utils/` | Contains utility functions and supporting modules. |
+| `app.py` | Main entry point for the Flask application. |
+| `create_user.py` | Script related to user creation or account initialization. |
+| `database.py` | Contains database connection or database access logic. |
+| `package.json` | Defines Node.js package metadata and scripts, if used by the project. |
+| `package-lock.json` | Records the dependency tree for npm packages. |
+| `requirements.txt` | Lists Python dependencies required by the application. |
+| `test_model.py` | Contains model-related testing code. |
+
+The descriptions above are based on the directory and file names. Their exact responsibilities should be confirmed by inspecting the source code.
+
 
 ## Requirements
 
@@ -186,9 +199,3 @@ This repository focuses on the web application implementation and integration of
 - The application uses predefined aspect categories.
 - Results may differ for reviews from other restaurants or domains.
 - Reproducing the research evaluation requires the corresponding dataset and experimental setup, which are not included here.
-
-## License
-
-Refer to the `LICENSE` file for the terms governing the source code in this repository.
-
-The trained model, pretrained IndoBERT components, and third-party dependencies may be subject to separate licensing terms.
